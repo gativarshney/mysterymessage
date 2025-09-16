@@ -15,10 +15,7 @@ interface VerificationEmailProps {
   otp: string;
 }
 
-export default function VerificationEmail({
-  userName,
-  otp,
-}: VerificationEmailProps) {
+export default function VerificationEmail({userName, otp}: VerificationEmailProps) {
   return (
     <Html lang="en" dir="ltr">
       <Head>
