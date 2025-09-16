@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mystery Message (True Feedback)
 
-## Getting Started
+**Mystery Message** is a full-stack web application that allows users to **receive anonymous messages**. Built with **Next.js, NextAuth, Shadcn, Tailwind CSS, and MongoDB**, this project demonstrates a practical approach to full-stack development while implementing real-world features like authentication, email verification, and message management.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🔑 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* **Custom Signup** – Users can register with unique usernames.
+* **Email Verification** – OTP-based verification ensures valid accounts.
+* **Secure Login** – Users can log in safely using NextAuth.
+* **Anonymous Messaging** – Each user has a unique URL to receive messages anonymously.
+* **Message Management** – Users can accept, decline, or delete messages.
+* **Custom Sign-Up Flow** – Combines custom authentication logic with NextAuth integration.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📚 Learning Outcomes
 
-## Learn More
+* Implemented a **custom signup flow** and authentication using **NextAuth**.
+* Integrated **email verification** with **Resend API**.
+* Applied **form validation** using **React Hook Form** and **Zod**.
+* Built a **responsive and user-friendly interface** with Tailwind CSS and Shadcn.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
