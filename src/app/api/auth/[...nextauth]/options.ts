@@ -3,8 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";   
 import UserModel from "@/model/User";
-import { PassThrough } from "stream";
-import { isPagesAPIRouteMatch } from "next/dist/server/route-matches/pages-api-route-match";
 
 export const authOptions : NextAuthOptions = {
     providers : [
@@ -16,7 +14,7 @@ export const authOptions : NextAuthOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials : any) : Promise<any> {
-                await dbConnect;
+                await dbConnect()
                 try {
                     const user = await UserModel.findOne({
                         $or: [
@@ -45,31 +43,35 @@ export const authOptions : NextAuthOptions = {
         })
     ],
     callbacks: {
+        // Callback to include custom properties in the JWT token 
         async jwt({ token, user }) {
             if(user){
                 token._id = user._id?.toString()
                 token.isVerified = user.isVerified
-                token.isAcceptingMessages = user.isAcceptingMessages
+                token.isAcceptingMessage = user.isAcceptingMessage
                 token.username = user.username
             }
-
             return token
         },
+        // Callback to include custom properties in the session object
         async session({ session, token }) {
             if(token) { 
                 session.user._id = token._id 
                 session.user.isVerified = token.isVerified
-                session.user.isAcceptingMessages = token.isAcceptingMessages
+                session.user.isAcceptingMessage = token.isAcceptingMessage
                 session.user.username = token.username
             }
             return session
         },
     },
     pages: {
+        // Custom sign-in page instead of the default NextAuth.js page which includes /auth/signin
         signIn: '/sign-in'
     },
     session: {
         strategy: 'jwt'
     },
+    // Secret for encrypt JWT and protect session integrity
     secret: process.env.NEXTAUTH_SECRET
 }
+//* NextAuth handles login + session; authorize decides WHO logs in; callbacks decide WHAT data is stored and exposed.
