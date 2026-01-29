@@ -23,3 +23,4 @@ export async function sendVerificationEmail(
         return{success : false, message: "Failed to send verification Email"}
     }
 }
+// This function sends a verification email using the Resend service. It takes the recipient's email, username, and a verification code as parameters, and returns an ApiResponse indicating success or failure.

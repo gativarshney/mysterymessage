@@ -1,4 +1,4 @@
-import mongoose, {Schema, Document} from "mongoose";
+import mongoose, {Schema, Document} from "mongoose"; 
 
 export interface Message extends Document {
     content : String;
@@ -7,7 +7,7 @@ export interface Message extends Document {
 const MessageSchema : Schema <Message> = new Schema ({
     content: {
         type : String,
-        requireed: true
+        required: true
     },
     createdAt : {
         type: Date,
@@ -23,19 +23,21 @@ export interface User extends Document {
     verifyCodeExpiry: Date,
     isVerified: boolean,
     isAcceptingMessage: boolean,
-    messages: Message[]
+    messages: Message[]     // Array of messages
 }
 const UserSchema : Schema <User> = new Schema ({
     username : {
         type: String,
-        required: [true, "Username is required"],
+        required: [true, "Username is required"], // custom error message
         trim: true,
         unique: true
     },
     email: {
         type: String,
-        required: [true, "Email is required"],
+        required: [true, "Email is required"],  
+        trim: true,
         unique: true,
+        // regex for email validation
         match: [
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 
         "Please enter a valid email",
@@ -64,6 +66,9 @@ const UserSchema : Schema <User> = new Schema ({
     messages : [MessageSchema]
 })
 
+// Next.js hot reloads files during development
+// If model is already created, reuse it
+// Otherwise create a new model
 const UserModel = (mongoose.models.User as mongoose.Model<User>) || (mongoose.model<User>("User", UserSchema))
 
 export default UserModel;
