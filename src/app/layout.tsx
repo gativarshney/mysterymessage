@@ -31,3 +31,5 @@ export default function RootLayout({
     </html>
   );
 }
+// RootLayout component that sets up the global HTML structure for the Next.js application.
+// It includes font integration using Google Fonts (Geist Sans and Geist Mono) and wraps the application with an AuthProvider to manage authentication state across the app.
