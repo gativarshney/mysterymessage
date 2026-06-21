@@ -4,6 +4,8 @@ import MessageCard from '@/components/MessageCard'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import PageAura from '@/components/ui/page-aura'
+import MonoBadge from '@/components/ui/mono-badge'
 import { useSession } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,7 +35,7 @@ const Dashboard = () => {
     }
   })
 
-  const { register, watch, setValue } = form
+  const { watch, setValue } = form
   const acceptMessages = watch('acceptMessages')
 
   const fetchAcceptMessageStatus = useCallback(async () => {
@@ -96,7 +98,7 @@ const Dashboard = () => {
 
   if (!session || !session.user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-neutral-950 text-neutral-400 text-sm">
+      <div className="flex min-h-screen items-center justify-center bg-neutral-950 text-sm text-neutral-400">
         Please sign in to view your dashboard.
       </div>
     )
@@ -112,36 +114,39 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">User Dashboard</h1>
-          <p className="text-neutral-400 text-sm">Manage your anonymous inbox and link sharing.</p>
+    <div className="relative min-h-screen overflow-hidden bg-neutral-950 px-4 py-12 text-neutral-100 sm:px-6 lg:px-8">
+      <PageAura />
+
+      <div className="relative z-10 mx-auto max-w-5xl space-y-8">
+
+        <div className="space-y-3">
+          <MonoBadge>your inbox</MonoBadge>
+          <h1 className="font-heading text-4xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-sm text-neutral-400">Manage your anonymous inbox and link sharing.</p>
         </div>
 
         {/* COPY LINK SECTION */}
-        <div className="space-y-3 bg-neutral-900/40 border border-neutral-800 p-6 rounded-2xl backdrop-blur-sm">
+        <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm">
           <h2 className="text-sm font-medium text-neutral-300">Your Unique Mystery Link</h2>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
               value={profileUrl}
               disabled
-              className="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-4 h-11 text-sm text-neutral-300 select-all"
+              className="h-11 flex-1 select-all rounded-xl border border-white/10 bg-white/[0.02] px-4 text-sm text-neutral-300"
             />
-            <Button 
+            <Button
               onClick={copyToClipboard}
-              className="bg-neutral-100 text-neutral-950 hover:bg-neutral-200 h-11 px-5 rounded-xl font-medium flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0"
+              className="flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-neutral-100 px-5 font-medium text-neutral-950 transition-all hover:bg-neutral-200 active:scale-95"
             >
-              <Copy className="w-4 h-4" />
+              <Copy className="h-4 w-4" />
               Copy Link
             </Button>
           </div>
         </div>
 
         {/* STATUS SETTINGS */}
-        <div className="flex items-center gap-3 bg-neutral-900/20 border border-neutral-800/60 p-4 rounded-xl w-fit">
+        <div className="flex w-fit items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
           <Switch
             checked={acceptMessages}
             onCheckedChange={handleSwitchChange}
@@ -150,36 +155,36 @@ const Dashboard = () => {
           <span className="text-sm font-medium text-neutral-300">
             Accept Messages: {acceptMessages ? 'ON' : 'OFF'}
           </span>
-          {isSwitchLoading && <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />}
+          {isSwitchLoading && <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />}
         </div>
 
-        <Separator className="bg-neutral-800" />
+        <Separator className="bg-white/10" />
 
         {/* MESSAGES SECTION */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold tracking-tight">Your Inbox</h2>
+            <h2 className="font-heading text-xl font-semibold tracking-tight">Your Inbox</h2>
             <Button
               variant="outline"
               size="icon"
               disabled={isLoading}
               onClick={() => fetchMessages(true)}
-              className="border-neutral-800 hover:bg-neutral-900 text-neutral-400 hover:text-neutral-200 h-9 w-9 rounded-xl transition-all"
+              className="h-9 w-9 rounded-xl border-white/10 bg-white/[0.03] text-neutral-400 transition-all hover:bg-white/[0.07] hover:text-neutral-200"
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className="h-4 w-4" />
               )}
             </Button>
           </div>
 
           {messages.length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-neutral-800 rounded-2xl text-neutral-500 text-sm">
+            <div className="rounded-2xl border border-dashed border-white/10 py-12 text-center text-sm text-neutral-500">
               No anonymous messages received yet.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {messages.map((message) => (
                 <MessageCard
                   key={message._id}

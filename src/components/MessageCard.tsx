@@ -19,7 +19,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
+import { X, MessageSquareText } from 'lucide-react'
 import axios, { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { ApiResponse } from '@/types/ApiResponse'
@@ -50,46 +50,50 @@ const MessageCard = ({ message, onMessageDelete }: MessageCardProps) => {
     }
 
     return (
-        <Card className="w-full bg-neutral-900/50 border-neutral-800 backdrop-blur-sm text-neutral-100">
+        <Card className="w-full rounded-2xl border-white/10 bg-white/[0.03] text-neutral-100 backdrop-blur-sm transition-colors hover:border-white/20">
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                <div className="space-y-1">
-                    <CardTitle className="text-lg font-medium leading-none tracking-tight">
-                        Anonymous Message
-                    </CardTitle>
-                    <CardDescription className="text-xs text-neutral-500">
-                        {new Date(message.createdAt).toLocaleDateString()}
-                    </CardDescription>
+                <div className="flex items-start gap-2.5">
+                    <MessageSquareText className="mt-0.5 h-4 w-4 shrink-0 text-violet-300" aria-hidden="true" />
+                    <div className="space-y-1">
+                        <CardTitle className="text-lg font-medium leading-none tracking-tight">
+                            Anonymous Message
+                        </CardTitle>
+                        <CardDescription className="text-xs text-neutral-500">
+                            {new Date(message.createdAt).toLocaleDateString()}
+                        </CardDescription>
+                    </div>
                 </div>
 
                 {/* DELETE DIALOG CONTAINER */}
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button 
-                            variant="destructive" 
-                            size="icon" 
-                            className="h-8 w-8 rounded-lg bg-red-950/40 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white transition-colors"
-                        > 
-                            <X className='w-4 h-4' />
+                        <Button
+                            variant="destructive"
+                            size="icon"
+                            aria-label="Delete message"
+                            className="h-8 w-8 rounded-lg border border-red-900/50 bg-red-950/40 text-red-400 transition-colors hover:bg-red-900 hover:text-white"
+                        >
+                            <X className='h-4 w-4' />
                         </Button>
                     </AlertDialogTrigger>
-                    
-                    <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-neutral-100">
+
+                    <AlertDialogContent className="border-white/10 bg-neutral-900 text-neutral-100">
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-neutral-100">
                                 Are you absolutely sure?
                             </AlertDialogTitle>
                             <AlertDialogDescription className="text-neutral-400">
-                                This action cannot be undone. This will permanently remove this 
+                                This action cannot be undone. This will permanently remove this
                                 anonymous mystery message from your dashboard database.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel className="bg-transparent border-neutral-700 hover:bg-neutral-800 text-neutral-300">
+                            <AlertDialogCancel className="border-neutral-700 bg-transparent text-neutral-300 hover:bg-neutral-800">
                                 Cancel
                             </AlertDialogCancel>
-                            <AlertDialogAction 
+                            <AlertDialogAction
                                 onClick={handleDeleteConfirm}
-                                className="bg-red-600 hover:bg-red-700 text-white"
+                                className="bg-red-600 text-white hover:bg-red-700"
                             >
                                 Continue
                             </AlertDialogAction>
@@ -100,7 +104,7 @@ const MessageCard = ({ message, onMessageDelete }: MessageCardProps) => {
 
             {/* MESSAGE BODY CONTENT */}
             <CardContent>
-                <p className="text-sm text-neutral-300 leading-relaxed break-words">
+                <p className="break-words text-sm leading-relaxed text-neutral-300">
                     {message.content}
                 </p>
             </CardContent>

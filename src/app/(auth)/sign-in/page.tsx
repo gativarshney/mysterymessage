@@ -11,6 +11,7 @@ import { signInSchema } from '@/schemas/signInSchema'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import AuthShell from '@/components/ui/auth-shell'
 import { Loader2 } from 'lucide-react'
 
 const Page = () => {
@@ -27,7 +28,7 @@ const Page = () => {
 
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     setIsSubmitting(true)
-    
+
     try {
       const result = await signIn('credentials', {
         redirect: false,
@@ -60,75 +61,73 @@ const Page = () => {
   }
 
   return (
-    <div className='flex justify-center items-center min-h-screen bg-neutral-950 text-neutral-100'>
-      <div className='w-full max-w-md p-8 space-y-8 bg-neutral-900/50 border border-neutral-800 rounded-2xl backdrop-blur-md shadow-xl'>
-        <div className='text-center'>
-          <h1 className='text-4xl font-bold mb-2 tracking-tight'>Welcome Back</h1>
-          <p className='text-neutral-400 text-sm'>Sign in to continue your anonymous adventure</p>
-        </div>
-
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          
-          {/* IDENTIFIER FIELD (EMAIL/USERNAME) */}
-          <Controller
-            control={form.control}
-            name="identifier"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid} className="space-y-2">
-                <FieldLabel>Email or Username</FieldLabel>
-                <Input
-                  {...field}
-                  placeholder="Enter your email or username"
-                  aria-invalid={fieldState.invalid}
-                />
-                <FieldError>{fieldState.error?.message}</FieldError>
-              </Field>
-            )}
-          />
-
-          {/* PASSWORD FIELD */}
-          <Controller
-            control={form.control}
-            name="password"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid} className="space-y-2">
-                <FieldLabel>Password</FieldLabel>
-                <Input
-                  {...field}
-                  type="password"
-                  placeholder="••••••••"
-                  aria-invalid={fieldState.invalid}
-                />
-                <FieldError>{fieldState.error?.message}</FieldError>
-              </Field>
-            )}
-          />
-
-          {/* SUBMIT BUTTON */}
-          <Button 
-            type="submit" 
-            disabled={isSubmitting} 
-            className="w-full flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              'Sign In'
-            )}
-          </Button>
-        </form>
-
-        <div className="text-center text-sm text-neutral-400">
+    <AuthShell
+      badge="welcome back"
+      title="Sign in"
+      subtitle="Continue your anonymous adventure"
+      footer={
+        <>
           Not a member yet?{' '}
-          <Link href="/sign-up" className="text-neutral-200 hover:underline font-medium">
+          <Link href="/sign-up" className="font-medium text-violet-300 hover:underline">
             Sign Up
           </Link>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+        {/* IDENTIFIER FIELD (EMAIL/USERNAME) */}
+        <Controller
+          control={form.control}
+          name="identifier"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid} className="space-y-2">
+              <FieldLabel>Email or Username</FieldLabel>
+              <Input
+                {...field}
+                placeholder="Enter your email or username"
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError>{fieldState.error?.message}</FieldError>
+            </Field>
+          )}
+        />
+
+        {/* PASSWORD FIELD */}
+        <Controller
+          control={form.control}
+          name="password"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid} className="space-y-2">
+              <FieldLabel>Password</FieldLabel>
+              <Input
+                {...field}
+                type="password"
+                placeholder="••••••••"
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError>{fieldState.error?.message}</FieldError>
+            </Field>
+          )}
+        />
+
+        {/* SUBMIT BUTTON */}
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-100 text-neutral-950 hover:bg-neutral-200"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            'Sign In'
+          )}
+        </Button>
+      </form>
+    </AuthShell>
   )
 }
 

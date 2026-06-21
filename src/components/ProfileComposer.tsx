@@ -8,6 +8,8 @@ import { toast } from 'sonner'
 import { Loader2, Send, Sparkles, MessageCircleQuestion } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import PageAura from '@/components/ui/page-aura'
+import MonoBadge from '@/components/ui/mono-badge'
 import { messageSchema } from '@/schemas/messageSchema'
 import { ApiResponse } from '@/types/ApiResponse'
 
@@ -61,18 +63,23 @@ const ProfileComposer = ({ username }: { username: string }) => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto space-y-8">
+    <div className="relative min-h-screen overflow-hidden bg-neutral-950 px-4 py-12 text-neutral-100 sm:px-6 lg:px-8">
+      <PageAura variant="mixed" />
 
-        <div className="space-y-2 text-center">
-          <p className="text-sm text-neutral-500">Send an anonymous message to</p>
-          <h1 className="text-4xl font-bold tracking-tight">@{username}</h1>
+      <div className="relative z-10 mx-auto max-w-2xl space-y-8">
+
+        <div className="space-y-3 text-center">
+          <div className="flex justify-center">
+            <MonoBadge>anonymous · untraceable</MonoBadge>
+          </div>
+          <p className="text-sm text-neutral-500">Send a message to</p>
+          <h1 className="font-heading text-4xl font-bold tracking-tight">@{username}</h1>
         </div>
 
         {/* COMPOSE CARD */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4 bg-neutral-900/40 border border-neutral-800 p-6 rounded-2xl backdrop-blur-sm"
+          className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm"
         >
           <div className="space-y-2">
             <textarea
@@ -80,7 +87,7 @@ const ProfileComposer = ({ username }: { username: string }) => {
               placeholder={`What's on your mind? Send @${username} something anonymously...`}
               rows={5}
               maxLength={CONTENT_MAX}
-              className="w-full resize-none bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
+              className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm text-neutral-100 placeholder:text-neutral-600 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/40"
             />
             <div className="flex items-center justify-between text-xs">
               <span className="text-red-400">{errors.content?.message}</span>
@@ -91,29 +98,29 @@ const ProfileComposer = ({ username }: { username: string }) => {
           <Button
             type="submit"
             disabled={isSending || !content}
-            className="w-full bg-neutral-100 text-neutral-950 hover:bg-neutral-200 h-11 rounded-xl font-medium flex items-center justify-center gap-2 transition-all active:scale-95"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-neutral-100 font-medium text-neutral-950 transition-all hover:bg-neutral-200 active:scale-95"
           >
             {isSending ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Sending...
               </>
             ) : (
               <>
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
                 Send Anonymously
               </>
             )}
           </Button>
         </form>
 
-        <Separator className="bg-neutral-800" />
+        <Separator className="bg-white/10" />
 
         {/* SUGGESTED MESSAGES */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-neutral-300 flex items-center gap-2">
-              <MessageCircleQuestion className="w-4 h-4 text-neutral-500" />
+            <h2 className="flex items-center gap-2 text-sm font-medium text-neutral-300">
+              <MessageCircleQuestion className="h-4 w-4 text-violet-300" />
               Need inspiration?
             </h2>
             <Button
@@ -122,19 +129,19 @@ const ProfileComposer = ({ username }: { username: string }) => {
               size="sm"
               disabled={isSuggesting}
               onClick={fetchSuggestedMessages}
-              className="border-neutral-800 hover:bg-neutral-900 text-neutral-400 hover:text-neutral-200 rounded-xl gap-1.5"
+              className="gap-1.5 rounded-xl border-white/10 bg-white/[0.03] text-neutral-400 hover:bg-white/[0.07] hover:text-neutral-200"
             >
               {isSuggesting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="h-3.5 w-3.5" />
               )}
               Suggest Messages
             </Button>
           </div>
 
           {hasFetchedSuggestions && !isSuggesting && suggestions.length === 0 && (
-            <div className="text-center py-8 border border-dashed border-neutral-800 rounded-2xl text-neutral-500 text-sm">
+            <div className="rounded-2xl border border-dashed border-white/10 py-8 text-center text-sm text-neutral-500">
               Couldn&apos;t generate suggestions right now. Try again.
             </div>
           )}
@@ -146,7 +153,7 @@ const ProfileComposer = ({ username }: { username: string }) => {
                   key={index}
                   type="button"
                   onClick={() => setValue('content', question, { shouldValidate: true })}
-                  className="text-left bg-neutral-900/40 border border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900 rounded-xl px-4 py-3 text-sm text-neutral-300 transition-all active:scale-[0.99]"
+                  className="rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-left text-sm text-neutral-300 transition-all hover:border-violet-500/30 hover:bg-white/[0.05] active:scale-[0.99]"
                 >
                   {question}
                 </button>
