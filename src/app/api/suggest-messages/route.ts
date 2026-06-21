@@ -1,6 +1,19 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
-export async function POST() {
+export async function POST(request: Request) {
+    const ip = getClientIp(request);
+    const { success, resetAt } = rateLimit(`suggest-messages:${ip}`, 10, 60_000);
+    if (!success) {
+        return Response.json(
+            {
+                success: false,
+                message: "Too many requests. Please try again shortly."
+            },
+            { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)) } }
+        );
+    }
+
     try {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
