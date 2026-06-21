@@ -10,16 +10,16 @@ export const authOptions : NextAuthOptions = {
             id : "credentials",
             name : "Credentials",
             credentials: {
-                email: { label: "Email", type: "text"},
+                identifier: { label: "Email or Username", type: "text"},
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials : any) : Promise<any> {
+            async authorize(credentials) {
                 await dbConnect()
                 try {
                     const user = await UserModel.findOne({
                         $or: [
-                            {email : credentials.identifier},
-                            {username : credentials.identifier}
+                            {email : credentials?.identifier},
+                            {username : credentials?.identifier}
                         ]
                     })
                     if(!user){
@@ -29,15 +29,23 @@ export const authOptions : NextAuthOptions = {
                         throw new Error("Please Verify your account before login")
                     }
 
-                    const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password)
+                    const isPasswordCorrect = await bcrypt.compare(credentials?.password ?? "", user.password)
                     if(isPasswordCorrect){
-                        return user
+                        const userId = (user._id as { toString(): string }).toString()
+                        return {
+                            id: userId,
+                            _id: userId,
+                            email: user.email,
+                            username: user.username,
+                            isVerified: user.isVerified,
+                            isAcceptingMessage: user.isAcceptingMessage,
+                        }
                     }
                     else{
                         throw new Error('Incorrect Password')
                     }
-                } catch (err : any) {
-                    throw new Error(err)
+                } catch (err) {
+                    throw new Error(err instanceof Error ? err.message : "Authentication failed")
                 }
             }
         })

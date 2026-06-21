@@ -11,7 +11,7 @@
 
 Mystery Message is a full-stack messaging platform built on the App Router. Every registered user gets a unique public link that anyone can use to send them an anonymous message — no sign-in required for the sender. Recipients manage incoming messages from a private dashboard, where they can toggle whether they're accepting new messages and delete the ones they no longer want.
 
-The project is intentionally end-to-end: custom credential-based authentication with email OTP verification, a Gemini-powered prompt suggester to help senders break writer's block, and transactional email delivered through Resend with a React Email template.
+The project is intentionally end-to-end: custom credential-based authentication with email OTP verification, a Gemini-powered prompt suggester to help senders break writer's block, and transactional email delivered via Gmail SMTP with a React Email template.
 
 ## Features
 
@@ -31,7 +31,7 @@ The project is intentionally end-to-end: custom credential-based authentication 
 - Dashboard supports copying the public profile link, refreshing the message list, and deleting individual messages
 
 ### AI Features
-- "Suggest a message" powered by Google's Gemini (`gemini-1.5-flash`)
+- "Suggest a message" powered by Google's Gemini (`gemini-2.5-flash`)
 - Generates three open-ended, ice-breaker-style prompts on demand to help senders compose a message
 
 ### Security
@@ -71,11 +71,11 @@ The project is intentionally end-to-end: custom credential-based authentication 
 - NextAuth.js v4 (Credentials provider, JWT session strategy)
 
 **AI**
-- Google Generative AI SDK (`@google/generative-ai`) — Gemini 1.5 Flash
+- Google Generative AI SDK (`@google/generative-ai`) — Gemini 2.5 Flash
 
 **Email**
-- Resend (transactional email delivery)
-- React Email (`@react-email/components`) for the verification template
+- Gmail SMTP via `nodemailer` (transactional email delivery, free, no domain required)
+- React Email (`@react-email/components` + `@react-email/render`) for the verification template
 
 ## Project Architecture
 
@@ -118,13 +118,13 @@ sequenceDiagram
 sequenceDiagram
     participant U as User
     participant API as /api/sign-up
-    participant Resend
+    participant Gmail as Gmail SMTP
     participant DB as MongoDB
     U->>API: {username, email, password}
     API->>API: Generate 6-digit code (1hr expiry)
     API->>DB: Save user (isVerified=false)
-    API->>Resend: Send VerificationEmail template
-    Resend-->>U: Email with OTP
+    API->>Gmail: Send rendered VerificationEmail HTML
+    Gmail-->>U: Email with OTP
     U->>API: POST /api/verify-code {username, code}
     API->>DB: Validate code + expiry
     API->>DB: Set isVerified=true
@@ -154,7 +154,7 @@ sequenceDiagram
 sequenceDiagram
     participant Sender
     participant API as /api/suggest-messages
-    participant Gemini as Gemini 1.5 Flash
+    participant Gemini as Gemini 2.5 Flash
     Sender->>API: POST (no body)
     API->>Gemini: generateContent(prompt)
     Gemini-->>API: "Question 1 II Question 2 II Question 3"
@@ -201,7 +201,7 @@ mysterymessage/
 │   │   └── sendVerificationEmail.ts
 │   ├── lib/
 │   │   ├── dbConnect.ts
-│   │   ├── resend.ts
+│   │   ├── mailer.ts
 │   │   └── utils.ts
 │   ├── model/
 │   │   └── User.ts                   # User + Message Mongoose schemas
@@ -215,26 +215,30 @@ mysterymessage/
 
 ## Environment Variables
 
-Create a `.env.local` file in the project root with the following:
+Create a `.env.local` file in the project root with the following (see `.env.example` for a ready-to-copy template):
 
 | Variable | Description |
 | --- | --- |
 | `MONGODB_URI` | MongoDB connection string (Atlas or local instance) |
-| `NEXTAUTH_SECRET` | Secret used by NextAuth to sign/encrypt JWTs |
+| `NEXTAUTH_SECRET` | Secret used by NextAuth to sign/encrypt JWTs. Generate with `npx auth secret` |
+| `NEXTAUTH_URL` | Your app's origin (`http://localhost:3000` locally, your deployed URL in production) |
 | `GEMINI_API_KEY` | API key for Google's Generative AI (Gemini) used in `/api/suggest-messages` |
-| `RESEND_API_KEY` | API key for Resend, used to send verification emails |
+| `GMAIL_USER` | The Gmail address verification emails are sent from |
+| `GMAIL_APP_PASSWORD` | A Gmail [App Password](https://myaccount.google.com/apppasswords) (requires 2-Step Verification enabled) — not your regular Gmail password |
 
 ```bash
 # .env.local
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/mysterymessage
 NEXTAUTH_SECRET=your-random-secret
+NEXTAUTH_URL=http://localhost:3000
 GEMINI_API_KEY=your-gemini-api-key
-RESEND_API_KEY=your-resend-api-key
+GMAIL_USER=your-gmail-address@gmail.com
+GMAIL_APP_PASSWORD=your-16-character-app-password
 ```
 
 ## Local Development
 
-**Prerequisites:** Node.js 18+, a MongoDB connection string, a Gemini API key, and a Resend API key.
+**Prerequisites:** Node.js 18+, a MongoDB connection string, a Gemini API key, and a Gmail account with an App Password.
 
 ```bash
 # 1. Clone the repository
@@ -269,21 +273,25 @@ npm run lint    # run ESLint
 3. Vercel auto-detects Next.js — no custom build configuration is required.
 
 ### Environment Variables
-Add `MONGODB_URI`, `NEXTAUTH_SECRET`, `GEMINI_API_KEY`, and `RESEND_API_KEY` to your Vercel project settings (Production, Preview, and Development scopes as needed).
+Add `MONGODB_URI`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GEMINI_API_KEY`, `GMAIL_USER`, and `GMAIL_APP_PASSWORD` to your Vercel project settings (Production, Preview, and Development scopes as needed).
+- `NEXTAUTH_URL` — set to your deployed origin (e.g. `https://your-app.vercel.app`). NextAuth logs a warning and can misbehave on auth callbacks without it.
+- `NEXTAUTH_SECRET` — generate a real random value (`npx auth secret`), don't reuse a guessable string.
 
 ### MongoDB Atlas
 1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 2. Whitelist `0.0.0.0/0` (or Vercel's IP ranges) under Network Access.
 3. Create a database user and copy the connection string into `MONGODB_URI`.
 
-### Resend
-1. Create an account at [resend.com](https://resend.com).
-2. Generate an API key and set `RESEND_API_KEY`.
-3. The current verification sender (`onboarding@resend.dev`) is Resend's sandbox domain — verify a custom domain in Resend before sending to non-test recipients in production.
+### Gmail SMTP
+Verification emails are sent via Gmail SMTP (`nodemailer`) instead of a third-party email API — free, works for any recipient immediately, no domain or DNS setup required.
+1. Enable 2-Step Verification on the Google account you want to send from.
+2. Generate an [App Password](https://myaccount.google.com/apppasswords) (16 characters, no spaces).
+3. Set `GMAIL_USER` to that Gmail address and `GMAIL_APP_PASSWORD` to the generated password — **not** your regular Gmail login password.
+4. Free Gmail accounts cap outbound mail at roughly 500/day, far above what this app needs at portfolio scale. Deliverability is solid but not guaranteed to bypass spam filters the way a verified custom domain would.
 
 ### Gemini
 1. Create an API key in [Google AI Studio](https://aistudio.google.com/).
-2. Set `GEMINI_API_KEY`. No additional configuration is required for `gemini-1.5-flash`.
+2. Set `GEMINI_API_KEY`. No additional configuration is required for `gemini-2.5-flash`.
 
 ## API Routes
 
@@ -295,7 +303,7 @@ Add `MONGODB_URI`, `NEXTAUTH_SECRET`, `GEMINI_API_KEY`, and `RESEND_API_KEY` to 
 | `/api/check-username-unique` | GET | No | Checks whether a username is available (query param `username`) |
 | `/api/send-message` | POST | No | Submits an anonymous message to a recipient by username |
 | `/api/suggest-messages` | POST | No | Returns three AI-generated message prompts from Gemini |
-| `/api/get-messsages` | GET | **Yes** | Returns all messages for the signed-in user (newest first) |
+| `/api/get-messages` | GET | **Yes** | Returns all messages for the signed-in user (newest first) |
 | `/api/accept-messages` | GET | **Yes** | Returns the current user's `isAcceptingMessage` status |
 | `/api/accept-messages` | POST | **Yes** | Updates the current user's `isAcceptingMessage` status |
 | `/api/delete-message/[messageid]` | DELETE | **Yes** | Deletes a single message belonging to the signed-in user |
@@ -312,13 +320,11 @@ Authenticated routes verify the session with `getServerSession(authOptions)` and
 
 ## Future Improvements
 
-- Implement the `/u/[username]` public profile page (currently a stub) with a polished message-composition UI
 - Move messages to a dedicated collection with pagination once inboxes grow large
-- Add rate limiting on `/api/send-message` and `/api/suggest-messages` to prevent abuse
 - Support OAuth providers (Google/GitHub) alongside credentials login
-- Add a `.env.example` file to the repository
 - Add automated tests (unit tests for schemas/helpers, integration tests for API routes)
-- Verify a custom sending domain in Resend for production email deliverability
+- Move the in-memory rate limiter to a shared store (e.g. Upstash Redis) if deployed across multiple instances
+- Verify a custom sending domain (Resend, SES, etc.) for stronger email deliverability than Gmail SMTP at higher volume
 
 ## Contributing
 
