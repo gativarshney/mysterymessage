@@ -26,6 +26,15 @@ const Navbar = () => {
                 Welcome, <span className="font-medium text-neutral-200">{user?.username || user?.name || user?.email}</span>
               </span>
 
+              <Link href="/dashboard">
+                <Button
+                  variant="outline"
+                  className="h-9 rounded-xl border-white/10 bg-white/[0.03] px-4 text-sm text-neutral-200 transition-all hover:bg-white/[0.07]"
+                >
+                  Dashboard
+                </Button>
+              </Link>
+
               <Button
                 onClick={() => signOut({ callbackUrl: '/' })}
                 variant="outline"
