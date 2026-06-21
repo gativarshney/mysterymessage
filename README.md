@@ -2,10 +2,12 @@
 
 > Send and receive anonymous messages, with AI-generated conversation starters.
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose%208-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![NextAuth](https://img.shields.io/badge/Auth-NextAuth.js%20v4-purple)](https://next-auth.js.org/)
+
+**Live demo:** [mysterymessage-eta.vercel.app](https://mysterymessage-eta.vercel.app/)
 
 ## Overview
 
@@ -40,12 +42,15 @@ The project is intentionally end-to-end: custom credential-based authentication 
 - Unverified accounts are blocked at the credentials-authorize step
 - Server-side Zod validation on all mutating API routes
 - Protected API routes verify an active NextAuth session via `getServerSession`
+- IP-based rate limiting on the public `/api/send-message` and `/api/suggest-messages` endpoints
 
 ### User Experience
+- Techy, dark-themed design system: dot-grid + aurora backgrounds, Space Grotesk/Inter/JetBrains Mono fonts, glassmorphic cards, violet/pink accents — consistent across every page
 - Responsive UI built with shadcn/ui (Radix primitives) and Tailwind CSS v4
 - Toast notifications via Sonner for form feedback and async actions
-- Animated message carousel on the landing page showcasing example messages
+- Animated message carousel and a full "how it works" section on the landing page
 - React Hook Form + Zod for client-side validation with inline error states
+- Per-route `loading.tsx`, `error.tsx`, and `not-found.tsx` (including a real 404 for nonexistent `/u/[username]` profiles), plus global fallbacks
 
 
 
@@ -172,29 +177,40 @@ mysterymessage/
 │   ├── app/
 │   │   ├── (app)/
 │   │   │   ├── layout.tsx           # Navbar + content shell
-│   │   │   ├── page.tsx             # Landing page
-│   │   │   └── dashboard/page.tsx   # Authenticated message dashboard
+│   │   │   ├── page.tsx             # Landing page (hero, how-it-works, features)
+│   │   │   ├── dashboard/
+│   │   │   │   ├── page.tsx         # Authenticated message dashboard
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── error.tsx
 │   │   ├── (auth)/
 │   │   │   ├── sign-in/page.tsx
 │   │   │   ├── sign-up/page.tsx
 │   │   │   └── verify/[username]/page.tsx
-│   │   ├── u/[username]/page.tsx    # Public anonymous message page
+│   │   ├── u/[username]/
+│   │   │   ├── page.tsx             # Public anonymous message page (server component)
+│   │   │   ├── loading.tsx
+│   │   │   ├── error.tsx
+│   │   │   └── not-found.tsx
 │   │   ├── api/
 │   │   │   ├── auth/[...nextauth]/  # NextAuth handler + options
 │   │   │   ├── sign-up/route.ts
 │   │   │   ├── verify-code/route.ts
 │   │   │   ├── check-username-unique/route.ts
-│   │   │   ├── send-message/route.ts
-│   │   │   ├── suggest-messages/route.ts
-│   │   │   ├── get-messsages/route.ts
+│   │   │   ├── send-message/route.ts        # rate limited
+│   │   │   ├── suggest-messages/route.ts    # rate limited
+│   │   │   ├── get-messages/route.ts
 │   │   │   ├── accept-messages/route.ts
 │   │   │   └── delete-message/[messageid]/route.ts
-│   │   ├── layout.tsx                # Root layout, providers
-│   │   └── globals.css
+│   │   ├── layout.tsx                # Root layout, fonts, providers
+│   │   ├── globals.css
+│   │   ├── icon.svg                  # Favicon
+│   │   ├── loading.tsx / error.tsx / not-found.tsx / global-error.tsx
 │   ├── components/
 │   │   ├── MessageCard.tsx
 │   │   ├── Navbar.tsx
-│   │   └── ui/                       # shadcn/ui primitives
+│   │   ├── ProfileComposer.tsx       # Client UI for /u/[username]
+│   │   └── ui/                       # shadcn/ui primitives + page-aura, mono-badge,
+│   │                                 # auth-shell, status-shell (shared design system)
 │   ├── context/
 │   │   └── AuthProvider.tsx          # SessionProvider wrapper
 │   ├── helpers/
@@ -202,6 +218,7 @@ mysterymessage/
 │   ├── lib/
 │   │   ├── dbConnect.ts
 │   │   ├── mailer.ts
+│   │   ├── rateLimit.ts              # In-memory IP rate limiter
 │   │   └── utils.ts
 │   ├── model/
 │   │   └── User.ts                   # User + Message Mongoose schemas
@@ -271,6 +288,8 @@ npm run lint    # run ESLint
 1. Push the repository to GitHub.
 2. Import the project into [Vercel](https://vercel.com/new).
 3. Vercel auto-detects Next.js — no custom build configuration is required.
+
+This project is deployed at [mysterymessage-eta.vercel.app](https://mysterymessage-eta.vercel.app/).
 
 ### Environment Variables
 Add `MONGODB_URI`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GEMINI_API_KEY`, `GMAIL_USER`, and `GMAIL_APP_PASSWORD` to your Vercel project settings (Production, Preview, and Development scopes as needed).
