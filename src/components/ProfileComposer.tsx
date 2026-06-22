@@ -7,7 +7,6 @@ import axios, { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { Loader2, Send, Sparkles, MessageCircleQuestion } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import PageAura from '@/components/ui/page-aura'
 import MonoBadge from '@/components/ui/mono-badge'
 import { messageSchema } from '@/schemas/messageSchema'
@@ -114,22 +113,24 @@ const ProfileComposer = ({ username }: { username: string }) => {
           </Button>
         </form>
 
-        <Separator className="bg-white/10" />
-
         {/* SUGGESTED MESSAGES */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-neutral-300">
-              <MessageCircleQuestion className="h-4 w-4 text-violet-300" />
-              Need inspiration?
-            </h2>
+        <div className="space-y-4 rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.08] via-white/[0.03] to-fuchsia-500/[0.05] p-6 shadow-[0_0_30px_-10px_rgba(167,139,250,0.25)]">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-neutral-100">
+                <MessageCircleQuestion className="h-5 w-5 text-violet-300" />
+                Need inspiration?
+              </h2>
+              <p className="text-sm text-neutral-400">
+                Let AI suggest a few engaging questions to send anonymously.
+              </p>
+            </div>
             <Button
               type="button"
-              variant="outline"
               size="sm"
               disabled={isSuggesting}
               onClick={fetchSuggestedMessages}
-              className="gap-1.5 rounded-xl border-white/10 bg-white/[0.03] text-neutral-400 hover:bg-white/[0.07] hover:text-neutral-200"
+              className="gap-1.5 rounded-xl bg-violet-500 font-medium text-white shadow-[0_0_20px_-5px_rgba(167,139,250,0.6)] transition-all hover:bg-violet-400 active:scale-95"
             >
               {isSuggesting ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -153,7 +154,7 @@ const ProfileComposer = ({ username }: { username: string }) => {
                   key={index}
                   type="button"
                   onClick={() => setValue('content', question, { shouldValidate: true })}
-                  className="rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-left text-sm text-neutral-300 transition-all hover:border-violet-500/30 hover:bg-white/[0.05] active:scale-[0.99]"
+                  className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-left text-sm text-neutral-200 transition-all hover:border-violet-500/40 hover:bg-white/[0.08] active:scale-[0.99]"
                 >
                   {question}
                 </button>
